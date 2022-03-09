@@ -200,17 +200,17 @@ router.post("/mycart", (req, res) => {
        var query = `select c.*,(select s.name from products s where s.id = c.booking_id) as servicename
        ,(select s.image from products s where s.id = c.booking_id) as productlogo,
        (select s.quantity from products s where s.id = c.booking_id) as productquantity
-       from cart c where c.number = '${req.body.number}';`
-       var query1 = `select count(id) as counter from cart where number = '${req.body.number}';`
-       var query2 = `select sum(c.price) as total_ammount from cart c where c.quantity <= (select p.quantity from products p where p.id = c.booking_id ) and  c.number = '${req.body.number}' ;`
+       from cart c where c.usernumber = '${req.body.number}';`
+       var query1 = `select count(id) as counter from cart where usernumber = '${req.body.number}';`
+       var query2 = `select sum(c.price) as total_ammount from cart c where c.quantity <= (select p.quantity from products p where p.id = c.booking_id ) and  c.usernumber = '${req.body.number}' ;`
        var query3 = `select c.*,(select s.name from products s where s.id = c.booking_id) as servicename
        ,(select s.image from products s where s.id = c.booking_id) as productlogo,
        (select s.quantity from products s where s.id = c.booking_id) as productquantity,
        (select s.small_description from products s where s.id = c.booking_id) as productsmalldescription
    
          
-       from cart c where c.quantity <= (select p.quantity from products p where p.id = c.booking_id ) and c.number = '${req.body.number}' ;`
-       var query4 = `select count(id) as counter from cart c where c.quantity <= (select p.quantity from products p where p.id = c.booking_id ) and c.number = '${req.body.number}';`
+       from cart c where c.quantity <= (select p.quantity from products p where p.id = c.booking_id ) and c.usernumber = '${req.body.number}' ;`
+       var query4 = `select count(id) as counter from cart c where c.quantity <= (select p.quantity from products p where p.id = c.booking_id ) and c.usernumber = '${req.body.number}';`
        pool.query(query+query1+query2+query3+query4, (err, result) => {
          if (err) throw err;
          else if (result[0][0]) {
