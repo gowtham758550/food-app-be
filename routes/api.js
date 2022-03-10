@@ -793,9 +793,6 @@ pool.query(`update delivery set ? where id = ?`, [req.body, req.body.id], (err, 
 })
 
 
-
-
-
 router.get('/delivery-ongoing-order',(req,res)=>{
   pool.query(`select f.*,
   (select v.name  from products v wehre v.id = f.booking_id) as productsname,
