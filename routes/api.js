@@ -337,8 +337,530 @@ router.post("/mycart", (req, res) => {
   })
 
 
+  // start here 
+
+  router.get('/profile',(req,res)=>{
+    pool.query(`select * from users where number = '${req.query.number}'`,(err,result)=>{
+      if(err) throw err;
+      else res.json(result)
+    })
+  })
+
+  router.post('/update-profile', (req, res) => {
+    console.log('data',req.body)
+    pool.query(`update profile set ? where id = ?`, [req.body, req.body.id], (err, result) => {
+        if(err) {
+            res.json({
+                status:500,
+                type : 'error',
+                description:err
+            })
+        }
+        else {
+            res.json({
+                status:200,
+                type : 'success',
+                description:'successfully update'
+            })
+  
+            
+        }
+    })
+  })
+
+  router.get('/notification',(req,res)=>{
+    pool.query(`select * from notification where number = '${req.query.number}' and type = '${req.query.type}'`,(err,result)=>{
+      if(err) throw err;
+      else res.json(result)
+    })
+  })
+
+
+  router.get('/favourite-restaurant',(req,res)=>{
+    pool.query(`select f.*,
+    (select v.name  from vendor v wehre v.id = f.typeid) as vendorname,
+    (select v.image from vendor v wehre v.id = f.typeid) as vendorimage,
+    (select v.rating from vendor v wehre v.id = f.typeid) as vendorrating,
+    (select v.address from vendor v wehre v.id = f.typeid) as vendoraddress
+    from favourite f where f.number = '${req.query.number}' and f.type = 'restaurant'`,(err,result)=>{
+      if(err) throw err;
+      else res.json(result)
+    })
+  })
+
+
+  router.get('/favourite-food',(req,res)=>{
+    pool.query(`select f.*,
+    (select v.name  from vendor v wehre v.id = f.typeid) as productsname,
+    (select v.image  from vendor v wehre v.id = f.typeid) as productsimage,
+    (select v.price  from vendor v wehre v.id = f.typeid) as productsprice,
+    (select c.name from category where c.id = (select v.categoryid from vendor v where v.id = f.typeid)) as productscategory
+    from products f where f.number = '${req.query.number}' and f.type = 'food'`,(err,result)=>{
+      if(err) throw err;
+      else res.json(result)
+    })
+  })
+
+ 
+  router.get('/vendor-ongoing-order',(req,res)=>{
+    pool.query(`select f.*,
+    (select v.name  from products v wehre v.id = f.booking_id) as productsname,
+    (select v.image  from products v wehre v.id = f.booking_id) as productsimage,
+    (select v.price  from products v wehre v.id = f.booking_id) as productsprice
+    from booking f where f.number = '${req.query.number}' and status != 'completed'`,(err,result)=>{
+      if(err) throw err;
+      else res.json(result)
+    })
+  })
+  
+  
+  router.get('/vendor-completed-order',(req,res)=>{
+    pool.query(`select f.*,
+    (select v.name  from products v wehre v.id = f.booking_id) as productsname,
+    (select v.image  from products v wehre v.id = f.booking_id) as productsimage,
+    (select v.price  from products v wehre v.id = f.booking_id) as productsprice
+    from booking f where f.number = '${req.query.number}' and status = 'completed'`,(err,result)=>{
+      if(err) throw err;
+      else res.json(result)
+    })
+  })
+
+
+  router.get('/single-order',(req,res)=>{
+    pool.query(`select f.*,
+    (select v.name  from products v wehre v.id = f.booking_id) as productsname,
+    (select v.image  from products v wehre v.id = f.booking_id) as productsimage,
+    (select v.price  from products v wehre v.id = f.booking_id) as productsprice
+    from booking f where f.id = '${req.query.id}'`,(err,result)=>{
+      if(err) throw err;
+      else res.json(result)
+    })
+  })
+
+  router.get('/offers',(req,res)=>{
+    pool.query(`select * from offers order by id desc`,(err,result)=>{
+      if(err) throw err;
+      else res.json(result)
+    })
+  })
+
+
+  // user api end here 
 
   
+  // vendor api starts
+
+  router.post('/vendor-validate',(req,res)=>{
+    let body = req.body;
+    console.log(req.body)
+    pool.query(`select * from vendor where ${Object.keys(body)[0].toString()} = '${Object.values(body)[0]}'`,(err,result)=>{
+      if(err) throw err;
+      else if(result[0]) res.json({status : 500 , msg : 'User Found'});
+      else res.json({status : 200 ,msg:'User Not Found'});
+    })
+})
+
+
+router.post('/vendor-sign-up',(req,res)=>{
+    let body = req.body;
+    var today = new Date();
+    var dd = String(today.getDate()).padStart(2, '0');
+    var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
+    var yyyy = today.getFullYear();
+
+    today = mm + '/' + dd + '/' + yyyy;
+
+    body['created_date']  = today;
+    body['password'] = bcrypt.hashSync(req.body.password, salt); 
+
+    pool.query(`insert into vendor set ?`,body,(err,result)=>{
+        err ? res.json({status:500 , msg : 'error occured' , description : err}) : res.json({status:200 , msg : 'success' , description : result})
+    })
+})
+
+
+router.post('/vendor-login',(req,res)=>{
+    let body = req.body;
+    pool.query(`select * from vendor where ${Object.keys(body)[0].toString()} = '${Object.values(body)[0]}'`,(err,result)=>{
+        if(err) throw err;
+        else if(result[0]) {
+            let password = result[0].password;
+            let checkpassword = bcrypt.compareSync(req.body.password, password);
+            if(checkpassword == true) res.json({status : 200 ,msg:'User Found' , description : result})
+            else res.json({status : 500 ,msg:'Incorrect Password' , description : 'Password Not Match'})
+        }
+        else res.json({status : 500 ,msg:'Email or Number Not Found' , description : 'Email or Number Not Exists'});
+      })
+})
+
+router.get('/vendor-profile',(req,res)=>{
+  pool.query(`select * from vendor where number = '${req.query.number}'`,(err,result)=>{
+    if(err) throw err;
+    else res.json(result)
+  })
+})
+
+router.post('/update-vendor-profile', (req, res) => {
+  console.log('data',req.body)
+  pool.query(`update vendor set ? where id = ?`, [req.body, req.body.id], (err, result) => {
+      if(err) {
+          res.json({
+              status:500,
+              type : 'error',
+              description:err
+          })
+      }
+      else {
+          res.json({
+              status:200,
+              type : 'success',
+              description:'successfully update'
+          })
+
+          
+      }
+  })
+})
+
+
+router.post('/vendor/update-image',upload.fields([{ name: 'image', maxCount: 1 }, { name: 'id_proof', maxCount: 8 }]), (req, res) => {
+  let body = req.body;
+  body['image'] = req.files.image[0].filename;
+  body['id_proof'] = req.files.id_proof[0].filename;
+
+
+
+pool.query(`update vendor set ? where id = ?`, [req.body, req.body.id], (err, result) => {
+      if(err) {
+          res.json({
+              status:500,
+              type : 'error',
+              description:err
+          })
+      }
+      else {
+          res.json({
+              status:200,
+              type : 'success',
+              description:'successfully update'
+          })
+
+      }
+  })
+
+
+})
+
+
+router.get('/vendor-dashboard',(req,res)=>{
+  var query = `select count(id) as total_products from products where vendorid = '${req.query.vendorid}';`
+  var query1 = `select sum(quantity) as total_stock from products where vendorid = '${req.query.vendorid}';`
+  pool.query(query+query1,(err,result)=>{
+    if(err) throw err;
+    else res.json(result);
+  })
+})
+
+
+router.post('/save-menu',(req,res)=>{
+  let body = req.body;
+  console.log('body h',req.body)
+  pool.query(`insert into menu set ?`,body,(err,result)=>{
+      if(err) throw err;
+      else res.json({
+          msg : 'success'
+      })
+  })
+})
+
+
+
+router.get('/get-menu',(req,res)=>{
+  pool.query(`select * from menu where vendorid = '${req.query.vendorid}'`,(err,result)=>{
+    if(err) throw err;
+    else res.json(result)
+  })
+})
+
+
+router.get('/delete-menu',(req,res)=>{
+  pool.query(`delete from menu where id = '${req.query.id}'`,(err,result)=>{
+    if(err) throw err;
+    else res.json({msg:'success'})
+  })
+})
+
+
+router.post('/save-products',(req,res)=>{
+  let body = req.body;
+  console.log('body h',req.body)
+  pool.query(`insert into products set ?`,body,(err,result)=>{
+      if(err) throw err;
+      else res.json({
+          msg : 'success'
+      })
+  })
+})
+
+
+router.get('/get-products',(req,res)=>{
+  pool.query(`select * from products where vendorid = '${req.query.vendorid}'`,(err,result)=>{
+    if(err) throw err;
+    else res.json(result)
+  })
+})
   
+
+router.get('/delete-products',(req,res)=>{
+  pool.query(`delete from products where id = '${req.query.id}'`,(err,result)=>{
+    if(err) throw err;
+    else res.json({msg:'success'})
+  })
+})
+
+
+router.get('/get-offers',(req,res)=>{
+  pool.query(`select * from offers where vendorid = '${req.query.vendorid}' order by id desc`,(err,result)=>{
+    if(err) throw err;
+    else res.json(result)
+  })
+})
+
+
+router.get('/vendor-ongoing-order',(req,res)=>{
+  pool.query(`select f.*,
+  (select v.name  from products v wehre v.id = f.booking_id) as productsname,
+  (select v.image  from products v wehre v.id = f.booking_id) as productsimage,
+  (select v.price  from products v wehre v.id = f.booking_id) as productsprice
+  from booking f where f.vendorid = '${req.query.vendorid}' and status != 'completed'`,(err,result)=>{
+    if(err) throw err;
+    else res.json(result)
+  })
+})
+
+
+router.get('/vendor-completed-order',(req,res)=>{
+  pool.query(`select f.*,
+  (select v.name  from products v wehre v.id = f.booking_id) as productsname,
+  (select v.image  from products v wehre v.id = f.booking_id) as productsimage,
+  (select v.price  from products v wehre v.id = f.booking_id) as productsprice
+  from booking f where f.vendorid = '${req.query.vendorid}' and status = 'completed'`,(err,result)=>{
+    if(err) throw err;
+    else res.json(result)
+  })
+})
+
+
+router.get('/vendor-new-order',(req,res)=>{
+  pool.query(`select f.*,
+  (select v.name  from products v wehre v.id = f.booking_id) as productsname,
+  (select v.image  from products v wehre v.id = f.booking_id) as productsimage,
+  (select v.price  from products v wehre v.id = f.booking_id) as productsprice
+  from booking f where f.vendorid = '${req.query.vendorid}' and status = 'pending'`,(err,result)=>{
+    if(err) throw err;
+    else res.json(result)
+  })
+})
+
+
+router.post('/accept-order', (req, res) => {
+  console.log('data',req.body)
+  pool.query(`update booking set ? where id = ?`, [req.body, req.body.id], (err, result) => {
+      if(err) {
+          res.json({
+              status:500,
+              type : 'error',
+              description:err
+          })
+      }
+      else {
+          res.json({
+              status:200,
+              type : 'success',
+              description:'successfully update'
+          })
+
+          
+      }
+  })
+})
+
+
+// vendor api ends 
+
+
+// delivery api starts 
+
+
+router.post('/delivery-validate',(req,res)=>{
+  let body = req.body;
+  console.log(req.body)
+  pool.query(`select * from delivery where ${Object.keys(body)[0].toString()} = '${Object.values(body)[0]}'`,(err,result)=>{
+    if(err) throw err;
+    else if(result[0]) res.json({status : 500 , msg : 'User Found'});
+    else res.json({status : 200 ,msg:'User Not Found'});
+  })
+})
+
+
+router.post('/delivery-sign-up',(req,res)=>{
+  let body = req.body;
+  var today = new Date();
+  var dd = String(today.getDate()).padStart(2, '0');
+  var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
+  var yyyy = today.getFullYear();
+
+  today = mm + '/' + dd + '/' + yyyy;
+
+  body['created_date']  = today;
+  body['password'] = bcrypt.hashSync(req.body.password, salt); 
+
+  pool.query(`insert into delivery set ?`,body,(err,result)=>{
+      err ? res.json({status:500 , msg : 'error occured' , description : err}) : res.json({status:200 , msg : 'success' , description : result})
+  })
+})
+
+
+router.post('/delivery-login',(req,res)=>{
+  let body = req.body;
+  pool.query(`select * from delivery where ${Object.keys(body)[0].toString()} = '${Object.values(body)[0]}'`,(err,result)=>{
+      if(err) throw err;
+      else if(result[0]) {
+          let password = result[0].password;
+          let checkpassword = bcrypt.compareSync(req.body.password, password);
+          if(checkpassword == true) res.json({status : 200 ,msg:'User Found' , description : result})
+          else res.json({status : 500 ,msg:'Incorrect Password' , description : 'Password Not Match'})
+      }
+      else res.json({status : 500 ,msg:'Email or Number Not Found' , description : 'Email or Number Not Exists'});
+    })
+})
+
+router.get('/delivery-profile',(req,res)=>{
+pool.query(`select * from delivery where number = '${req.query.number}'`,(err,result)=>{
+  if(err) throw err;
+  else res.json(result)
+})
+})
+
+router.post('/update-delivery-profile', (req, res) => {
+console.log('data',req.body)
+pool.query(`update delivery set ? where id = ?`, [req.body, req.body.id], (err, result) => {
+    if(err) {
+        res.json({
+            status:500,
+            type : 'error',
+            description:err
+        })
+    }
+    else {
+        res.json({
+            status:200,
+            type : 'success',
+            description:'successfully update'
+        })
+
+        
+    }
+})
+})
+
+
+router.post('/delivery/update-image',upload.single('image'), (req, res) => {
+let body = req.body;
+body['image'] = req.file.filename;
+
+
+
+pool.query(`update delivery set ? where id = ?`, [req.body, req.body.id], (err, result) => {
+    if(err) {
+        res.json({
+            status:500,
+            type : 'error',
+            description:err
+        })
+    }
+    else {
+        res.json({
+            status:200,
+            type : 'success',
+            description:'successfully update'
+        })
+
+    }
+})
+
+
+})
+
+
+
+
+
+router.get('/delivery-ongoing-order',(req,res)=>{
+  pool.query(`select f.*,
+  (select v.name  from products v wehre v.id = f.booking_id) as productsname,
+  (select v.image  from products v wehre v.id = f.booking_id) as productsimage,
+  (select v.price  from products v wehre v.id = f.booking_id) as productsprice
+  from booking f where f.deliveryid = '${req.query.deliveryid}' and status != 'completed'`,(err,result)=>{
+    if(err) throw err;
+    else res.json(result)
+  })
+})
+
+
+router.get('/delivery-completed-order',(req,res)=>{
+  pool.query(`select f.*,
+  (select v.name  from products v wehre v.id = f.booking_id) as productsname,
+  (select v.image  from products v wehre v.id = f.booking_id) as productsimage,
+  (select v.price  from products v wehre v.id = f.booking_id) as productsprice
+  from booking f where f.deliverid = '${req.query.deliveryid}' and status = 'completed'`,(err,result)=>{
+    if(err) throw err;
+    else res.json(result)
+  })
+})
+
+
+router.get('/delivery-new-order',(req,res)=>{
+  pool.query(`select f.*,
+  (select v.name  from products v wehre v.id = f.booking_id) as productsname,
+  (select v.image  from products v wehre v.id = f.booking_id) as productsimage,
+  (select v.price  from products v wehre v.id = f.booking_id) as productsprice
+  from booking f where f.deliveryid = '${req.query.deliveryid}' and status = 'pending'`,(err,result)=>{
+    if(err) throw err;
+    else res.json(result)
+  })
+})
+
+
+router.post('/accept-order', (req, res) => {
+  console.log('data',req.body)
+  pool.query(`update booking set ? where id = ?`, [req.body, req.body.id], (err, result) => {
+      if(err) {
+          res.json({
+              status:500,
+              type : 'error',
+              description:err
+          })
+      }
+      else {
+          res.json({
+              status:200,
+              type : 'success',
+              description:'successfully update'
+          })
+
+          
+      }
+  })
+})
+
+
+
+
+
+// delivery api ends 
+
+
+
 
 module.exports = router;
