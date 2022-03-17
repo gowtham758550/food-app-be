@@ -56,7 +56,7 @@ router.post('/login',(req,res)=>{
 router.get('/category',(req,res)=>{
     pool.query(`select * from category order by name`,(err,result)=>{
         if(err) throw err;
-        else res.json(result)
+        else res.json({status:200 , result})
     })
 })
 
@@ -68,7 +68,7 @@ router.get('/get-all-shops',(req,res)=>{
     FROM vendor having distance <= 60000000000 ORDER BY distance;`
      pool.query(query,(err,result)=>{
     if(err) throw err;
-        else res.json(result)
+        else res.json({status : 200 ,result})
   })
   })
 
@@ -77,7 +77,7 @@ router.get('/single-vendor-details',(req,res)=>{
     var query = `select * from vendor where id = '${req.query.vendorid}';`
     pool.query(query,(err,result)=>{
       if(err) throw err;
-      else res.json(result);
+      else res.json({status : 200 ,result});
     })
   
   })  
@@ -86,7 +86,7 @@ router.get('/single-vendor-details',(req,res)=>{
   router.get('/get-address',(req,res)=>{
     pool.query(`select * from address where usernumber = '${req.query.usernumber}'`,(err,result)=>{
         if(err) throw err;
-        else res.json(result)
+        else res.json({status : 200 ,result})
     })
 })
 
@@ -98,6 +98,7 @@ router.post('/save-address',(req,res)=>{
     pool.query(`insert into address set ?`,body,(err,result)=>{
         if(err) throw err;
         else res.json({
+          status : 200,
             msg : 'success'
         })
     })
@@ -107,7 +108,7 @@ router.post('/save-address',(req,res)=>{
 router.get('/delete-address',(req,res)=>{
     pool.query(`delete from address where id = '${req.query.id}'`,(err,result)=>{
       if(err) throw err;
-      else res.json({msg:'success'})
+      else res.json({status:200,msg:'success'})
     })
   })
   
@@ -116,7 +117,7 @@ router.get('/delete-address',(req,res)=>{
 router.get('/get-single-address',(req,res)=>{
     pool.query(`select * from address where id = '${req.query.id}'`,(err,result)=>{
       if(err) throw err;
-      else res.json(result)
+      else res.json({status:200,result})
     })
   })
   
@@ -147,7 +148,7 @@ router.get('/get-single-address',(req,res)=>{
 
 
 
-  router.post("/cart-handler", (req, res) => {
+router.post("/cart-handler", (req, res) => {
     let body = req.body
     console.log(req.body)
     if (req.body.quantity == "0" || req.body.quantity == 0) {
@@ -155,6 +156,7 @@ router.get('/get-single-address',(req,res)=>{
         if (err) throw err;
         else {
           res.json({
+            status:200,
             msg: "updated sucessfully",
           });
         }
@@ -169,6 +171,7 @@ router.get('/get-single-address',(req,res)=>{
                     if (err) throw err;
                     else {
                         res.json({
+                          status:200,
                           msg: "updated sucessfully",
                         });
                       }
@@ -183,6 +186,7 @@ router.get('/get-single-address',(req,res)=>{
                  if (err) throw err;
                  else {
                    res.json({
+                     status:200,
                      msg: "updated sucessfully",
                    });
                  }
@@ -220,6 +224,7 @@ router.post("/mycart", (req, res) => {
            res.json(result);
          } else
            res.json({
+             status:200,
              msg: "empty cart",
            });
        });
@@ -324,6 +329,7 @@ router.post("/mycart", (req, res) => {
     else {
   
       res.json({
+        status:200,
         msg : 'success'
     })
   
@@ -343,13 +349,13 @@ router.post("/mycart", (req, res) => {
   router.get('/profile',(req,res)=>{
     pool.query(`select * from users where number = '${req.query.number}'`,(err,result)=>{
       if(err) throw err;
-      else res.json(result)
+      else res.json({status:200,result})
     })
   })
 
   router.post('/update-profile', (req, res) => {
     console.log('data',req.body)
-    pool.query(`update profile set ? where id = ?`, [req.body, req.body.id], (err, result) => {
+    pool.query(`update users set ? where id = ?`, [req.body, req.body.id], (err, result) => {
         if(err) {
             res.json({
                 status:500,
@@ -372,76 +378,76 @@ router.post("/mycart", (req, res) => {
   router.get('/notification',(req,res)=>{
     pool.query(`select * from notification where number = '${req.query.number}' and type = '${req.query.type}'`,(err,result)=>{
       if(err) throw err;
-      else res.json(result)
+      else res.json({status:200,result})
     })
   })
 
 
   router.get('/favourite-restaurant',(req,res)=>{
     pool.query(`select f.*,
-    (select v.name  from vendor v wehre v.id = f.typeid) as vendorname,
-    (select v.image from vendor v wehre v.id = f.typeid) as vendorimage,
-    (select v.rating from vendor v wehre v.id = f.typeid) as vendorrating,
-    (select v.address from vendor v wehre v.id = f.typeid) as vendoraddress
+    (select v.name  from vendor v where v.id = f.typeid) as vendorname,
+    (select v.image from vendor v where v.id = f.typeid) as vendorimage,
+    (select v.rating from vendor v where v.id = f.typeid) as vendorrating,
+    (select v.address from vendor v where v.id = f.typeid) as vendoraddress
     from favourite f where f.number = '${req.query.number}' and f.type = 'restaurant'`,(err,result)=>{
       if(err) throw err;
-      else res.json(result)
+      else res.json({status:200,result})
     })
   })
 
 
   router.get('/favourite-food',(req,res)=>{
     pool.query(`select f.*,
-    (select v.name  from vendor v wehre v.id = f.typeid) as productsname,
-    (select v.image  from vendor v wehre v.id = f.typeid) as productsimage,
-    (select v.price  from vendor v wehre v.id = f.typeid) as productsprice,
+    (select v.name  from vendor v where v.id = f.typeid) as productsname,
+    (select v.image  from vendor v where v.id = f.typeid) as productsimage,
+    (select v.price  from vendor v where v.id = f.typeid) as productsprice,
     (select c.name from category where c.id = (select v.categoryid from vendor v where v.id = f.typeid)) as productscategory
     from products f where f.number = '${req.query.number}' and f.type = 'food'`,(err,result)=>{
       if(err) throw err;
-      else res.json(result)
+      else res.json({status:200,result})
     })
   })
 
  
-  router.get('/vendor-ongoing-order',(req,res)=>{
+  router.get('/ongoing-order',(req,res)=>{
     pool.query(`select f.*,
-    (select v.name  from products v wehre v.id = f.booking_id) as productsname,
-    (select v.image  from products v wehre v.id = f.booking_id) as productsimage,
-    (select v.price  from products v wehre v.id = f.booking_id) as productsprice
+    (select v.name  from products v where v.id = f.booking_id) as productsname,
+    (select v.image  from products v where v.id = f.booking_id) as productsimage,
+    (select v.price  from products v where v.id = f.booking_id) as productsprice
     from booking f where f.number = '${req.query.number}' and status != 'completed'`,(err,result)=>{
       if(err) throw err;
-      else res.json(result)
+      else res.json({status:200,result})
     })
   })
   
   
-  router.get('/vendor-completed-order',(req,res)=>{
+  router.get('/completed-order',(req,res)=>{
     pool.query(`select f.*,
-    (select v.name  from products v wehre v.id = f.booking_id) as productsname,
-    (select v.image  from products v wehre v.id = f.booking_id) as productsimage,
-    (select v.price  from products v wehre v.id = f.booking_id) as productsprice
+    (select v.name  from products v where v.id = f.booking_id) as productsname,
+    (select v.image  from products v where v.id = f.booking_id) as productsimage,
+    (select v.price  from products v where v.id = f.booking_id) as productsprice
     from booking f where f.number = '${req.query.number}' and status = 'completed'`,(err,result)=>{
       if(err) throw err;
-      else res.json(result)
+      else res.json({status:200,result})
     })
   })
 
 
   router.get('/single-order',(req,res)=>{
     pool.query(`select f.*,
-    (select v.name  from products v wehre v.id = f.booking_id) as productsname,
-    (select v.image  from products v wehre v.id = f.booking_id) as productsimage,
-    (select v.price  from products v wehre v.id = f.booking_id) as productsprice
+    (select v.name  from products v where v.id = f.booking_id) as productsname,
+    (select v.image  from products v where v.id = f.booking_id) as productsimage,
+    (select v.price  from products v where v.id = f.booking_id) as productsprice
     from booking f where f.id = '${req.query.id}'`,(err,result)=>{
       if(err) throw err;
-      else res.json(result)
+      else res.json({status:200,result})
     })
   })
 
   router.get('/offers',(req,res)=>{
     pool.query(`select * from offers order by id desc`,(err,result)=>{
       if(err) throw err;
-      else res.json(result)
+      else res.json({status:200,result})
     })
   })
 
@@ -630,9 +636,9 @@ router.get('/get-offers',(req,res)=>{
 
 router.get('/vendor-ongoing-order',(req,res)=>{
   pool.query(`select f.*,
-  (select v.name  from products v wehre v.id = f.booking_id) as productsname,
-  (select v.image  from products v wehre v.id = f.booking_id) as productsimage,
-  (select v.price  from products v wehre v.id = f.booking_id) as productsprice
+  (select v.name  from products v where v.id = f.booking_id) as productsname,
+  (select v.image  from products v where v.id = f.booking_id) as productsimage,
+  (select v.price  from products v where v.id = f.booking_id) as productsprice
   from booking f where f.vendorid = '${req.query.vendorid}' and status != 'completed'`,(err,result)=>{
     if(err) throw err;
     else res.json(result)
@@ -642,9 +648,9 @@ router.get('/vendor-ongoing-order',(req,res)=>{
 
 router.get('/vendor-completed-order',(req,res)=>{
   pool.query(`select f.*,
-  (select v.name  from products v wehre v.id = f.booking_id) as productsname,
-  (select v.image  from products v wehre v.id = f.booking_id) as productsimage,
-  (select v.price  from products v wehre v.id = f.booking_id) as productsprice
+  (select v.name  from products v where v.id = f.booking_id) as productsname,
+  (select v.image  from products v where v.id = f.booking_id) as productsimage,
+  (select v.price  from products v where v.id = f.booking_id) as productsprice
   from booking f where f.vendorid = '${req.query.vendorid}' and status = 'completed'`,(err,result)=>{
     if(err) throw err;
     else res.json(result)
@@ -654,9 +660,9 @@ router.get('/vendor-completed-order',(req,res)=>{
 
 router.get('/vendor-new-order',(req,res)=>{
   pool.query(`select f.*,
-  (select v.name  from products v wehre v.id = f.booking_id) as productsname,
-  (select v.image  from products v wehre v.id = f.booking_id) as productsimage,
-  (select v.price  from products v wehre v.id = f.booking_id) as productsprice
+  (select v.name  from products v where v.id = f.booking_id) as productsname,
+  (select v.image  from products v where v.id = f.booking_id) as productsimage,
+  (select v.price  from products v where v.id = f.booking_id) as productsprice
   from booking f where f.vendorid = '${req.query.vendorid}' and status = 'pending'`,(err,result)=>{
     if(err) throw err;
     else res.json(result)
@@ -796,9 +802,9 @@ pool.query(`update delivery set ? where id = ?`, [req.body, req.body.id], (err, 
 
 router.get('/delivery-ongoing-order',(req,res)=>{
   pool.query(`select f.*,
-  (select v.name  from products v wehre v.id = f.booking_id) as productsname,
-  (select v.image  from products v wehre v.id = f.booking_id) as productsimage,
-  (select v.price  from products v wehre v.id = f.booking_id) as productsprice
+  (select v.name  from products v where v.id = f.booking_id) as productsname,
+  (select v.image  from products v where v.id = f.booking_id) as productsimage,
+  (select v.price  from products v where v.id = f.booking_id) as productsprice
   from booking f where f.deliveryid = '${req.query.deliveryid}' and status != 'completed'`,(err,result)=>{
     if(err) throw err;
     else res.json(result)
@@ -808,9 +814,9 @@ router.get('/delivery-ongoing-order',(req,res)=>{
 
 router.get('/delivery-completed-order',(req,res)=>{
   pool.query(`select f.*,
-  (select v.name  from products v wehre v.id = f.booking_id) as productsname,
-  (select v.image  from products v wehre v.id = f.booking_id) as productsimage,
-  (select v.price  from products v wehre v.id = f.booking_id) as productsprice
+  (select v.name  from products v where v.id = f.booking_id) as productsname,
+  (select v.image  from products v where v.id = f.booking_id) as productsimage,
+  (select v.price  from products v where v.id = f.booking_id) as productsprice
   from booking f where f.deliverid = '${req.query.deliveryid}' and status = 'completed'`,(err,result)=>{
     if(err) throw err;
     else res.json(result)
@@ -820,9 +826,9 @@ router.get('/delivery-completed-order',(req,res)=>{
 
 router.get('/delivery-new-order',(req,res)=>{
   pool.query(`select f.*,
-  (select v.name  from products v wehre v.id = f.booking_id) as productsname,
-  (select v.image  from products v wehre v.id = f.booking_id) as productsimage,
-  (select v.price  from products v wehre v.id = f.booking_id) as productsprice
+  (select v.name  from products v where v.id = f.booking_id) as productsname,
+  (select v.image  from products v where v.id = f.booking_id) as productsimage,
+  (select v.price  from products v where v.id = f.booking_id) as productsprice
   from booking f where f.deliveryid = '${req.query.deliveryid}' and status = 'pending'`,(err,result)=>{
     if(err) throw err;
     else res.json(result)
