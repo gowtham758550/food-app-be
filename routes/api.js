@@ -389,7 +389,7 @@ router.post("/mycart", (req, res) => {
     (select v.image from vendor v where v.id = f.typeid) as vendorimage,
     (select v.rating from vendor v where v.id = f.typeid) as vendorrating,
     (select v.address from vendor v where v.id = f.typeid) as vendoraddress
-    from favourite f where f.number = '${req.query.number}' and f.type = 'restaurant'`,(err,result)=>{
+    from favourite f where f.number = '${req.query.number}' and f.type = 'favourite_restaurant'`,(err,result)=>{
       if(err) throw err;
       else res.json({status:200,result})
     })
@@ -402,7 +402,7 @@ router.post("/mycart", (req, res) => {
     (select v.image  from vendor v where v.id = f.typeid) as productsimage,
     (select v.price  from vendor v where v.id = f.typeid) as productsprice,
     (select c.name from category where c.id = (select v.categoryid from vendor v where v.id = f.typeid)) as productscategory
-    from products f where f.number = '${req.query.number}' and f.type = 'food'`,(err,result)=>{
+    from products f where f.number = '${req.query.number}' and f.type = 'favourite_food'`,(err,result)=>{
       if(err) throw err;
       else res.json({status:200,result})
     })
