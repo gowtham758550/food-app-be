@@ -73,6 +73,38 @@ router.get('/get-all-shops',(req,res)=>{
   })
 
 
+  router.get('/best-restaurant',(req,res)=>{
+    var query = `SELECT *, SQRT(
+        POW(69.1 * (latitude - '${req.query.latitude}'), 2) +
+        POW(69.1 * (longitude - '${req.query.longitude}') * COS(latitude / 57.3), 2)) AS distance
+    FROM vendor having distance <= 60000000000 ORDER BY rating desc , distance desc;`
+     pool.query(query,(err,result)=>{
+    if(err) throw err;
+        else res.json({status : 200 ,result})
+  })
+  })
+
+
+  router.get('/get-products',(req,res)=>{
+    pool.query(`select * from products where vendorid = '${req.query.vendorid}'`,(err,result)=>{
+      if(err) throw err;
+      else res.json({status:200,result})
+    })
+  })
+
+
+
+  router.get('/best-deals',(req,res)=>{
+    pool.query(`SELECT *, SQRT(
+      POW(69.1 * (latitude - '${req.query.latitude}'), 2) +
+      POW(69.1 * (longitude - '${req.query.longitude}') * COS(latitude / 57.3), 2)) AS distance
+  FROM products having distance <= 60000000000 ORDER BY discount desc , distance;`,(err,result)=>{
+      if(err) throw err;
+      else res.json({status:200,result})
+    })
+  })
+
+
 router.get('/single-vendor-details',(req,res)=>{
     var query = `select * from vendor where id = '${req.query.vendorid}';`
     pool.query(query,(err,result)=>{
@@ -445,7 +477,7 @@ router.post("/mycart", (req, res) => {
   })
 
   router.get('/offers',(req,res)=>{
-    pool.query(`select * from offers order by id desc`,(err,result)=>{
+    pool.query(`select * from offers where orderid = '${req.query.vendorid}' order by id desc`,(err,result)=>{
       if(err) throw err;
       else res.json({status:200,result})
     })
