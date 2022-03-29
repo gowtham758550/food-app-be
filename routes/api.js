@@ -54,7 +54,7 @@ router.post('/login',(req,res)=>{
 })
 
 
-router.get('/category/',(req,res)=>{
+router.get('/category',(req,res)=>{
     pool.query(`select * from category where market_place_id = '${req.query.market_place_id}' order by name`,(err,result)=>{
         if(err) throw err;
         else res.json({status:200 , result})
@@ -309,7 +309,7 @@ router.post("/mycart", (req, res) => {
    
   
   
-   pool.query(`select * from cart where number = '${req.body.usernumber}'`,(err,result)=>{
+   pool.query(`select * from cart where usernumber = '${req.body.usernumber}'`,(err,result)=>{
        if(err) throw err;
        else {
   
@@ -925,6 +925,10 @@ router.get('/get-zone',(req,res)=>{
   });
 });
 
+
+
+
+// Dummy#Dummy2022#Dummy
 
 // delivery api ends 
 
