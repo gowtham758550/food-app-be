@@ -908,7 +908,6 @@ router.get('/get-town',(req,res)=>{
   })
 })
 
-
 router.get('/get-district',(req,res)=>{
   pool.query(`select * from district`,(req,res)=>{
     if(err) throw err;
@@ -917,13 +916,16 @@ router.get('/get-district',(req,res)=>{
 })
 
 
-
 router.get('/get-zone',(req,res)=>{
   pool.query(`select * from zone`,(req,res)=>{
     if(err) throw err;
     else res.json(result);
   });
 });
+
+
+
+
 
 
 
