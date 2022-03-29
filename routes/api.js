@@ -39,7 +39,8 @@ router.post('/sign-up',(req,res)=>{
 
 
 router.post('/login',(req,res)=>{
-    let body = req.body;
+  let body = req.body;
+  console.log(req.body)
     pool.query(`select * from users where ${Object.keys(body)[0].toString()} = '${Object.values(body)[0]}'`,(err,result)=>{
         if(err) throw err;
         else if(result[0]) {
@@ -53,8 +54,8 @@ router.post('/login',(req,res)=>{
 })
 
 
-router.get('/category',(req,res)=>{
-    pool.query(`select * from category order by name`,(err,result)=>{
+router.get('/category/',(req,res)=>{
+    pool.query(`select * from category where market_place_id = '${req.query.market_place_id}' order by name`,(err,result)=>{
         if(err) throw err;
         else res.json({status:200 , result})
     })
@@ -892,6 +893,37 @@ router.post('/accept-order', (req, res) => {
 
 
 
+router.get('/get-marketplace',(req,res)=>{
+  pool.query(`select * from market_place`,(req,res)=>{
+    if(err) throw err;
+    else res.json(result);
+  })
+})
+
+
+router.get('/get-town',(req,res)=>{
+  pool.query(`select * from town`,(req,res)=>{
+    if(err) throw err;
+    else res.json(result);
+  })
+})
+
+
+router.get('/get-district',(req,res)=>{
+  pool.query(`select * from district`,(req,res)=>{
+    if(err) throw err;
+    else res.json(result);
+  })
+})
+
+
+
+router.get('/get-zone',(req,res)=>{
+  pool.query(`select * from zone`,(req,res)=>{
+    if(err) throw err;
+    else res.json(result);
+  });
+});
 
 
 // delivery api ends 
