@@ -367,6 +367,7 @@ router.post("/mycart", (req, res) => {
 
   router.post('/update-profile',upload.single('image'), (req, res) => {
     console.log('data',req.body)
+    let body = req.body
 
     if(req.file){
     body['image'] = req.file.filename;
