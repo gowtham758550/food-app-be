@@ -62,28 +62,7 @@ router.get('/category',(req,res)=>{
 })
 
 
-router.get('/get-all-shops',(req,res)=>{
-    var query = `SELECT *, SQRT(
-        POW(69.1 * (latitude - '${req.query.latitude}'), 2) +
-        POW(69.1 * (longitude - '${req.query.longitude}') * COS(latitude / 57.3), 2)) AS distance
-    FROM vendor having distance <= 60000000000 ORDER BY distance;`
-     pool.query(query,(err,result)=>{
-    if(err) throw err;
-        else res.json({status : 200 ,result})
-  })
-  })
 
-
-  router.get('/best-restaurant',(req,res)=>{
-    var query = `SELECT *, SQRT(
-        POW(69.1 * (latitude - '${req.query.latitude}'), 2) +
-        POW(69.1 * (longitude - '${req.query.longitude}') * COS(latitude / 57.3), 2)) AS distance
-    FROM vendor having distance <= 60000000000 ORDER BY rating desc , distance desc;`
-     pool.query(query,(err,result)=>{
-    if(err) throw err;
-        else res.json({status : 200 ,result})
-  })
-  })
 
 
   router.get('/get-products',(req,res)=>{
@@ -936,6 +915,48 @@ router.get('/get-banner',(req,res)=>{
 
 
 
+
+
+// home page api
+
+
+router.get('/get-all-marketplace',(req,res)=>{
+  var query = `SELECT *, SQRT(
+      POW(69.1 * (latitude - '${req.query.latitude}'), 2) +
+      POW(69.1 * (longitude - '${req.query.longitude}') * COS(latitude / 57.3), 2)) AS distance
+  FROM vendor where market_place_id = '${req.query.market_place_id}' having distance <= 60000000000 ORDER BY distance;`
+   pool.query(query,(err,result)=>{
+  if(err) throw err;
+      else res.json({status : 200 ,result})
+})
+})
+
+
+router.get('/best-marketplace',(req,res)=>{
+  var query = `SELECT *, SQRT(
+      POW(69.1 * (latitude - '${req.query.latitude}'), 2) +
+      POW(69.1 * (longitude - '${req.query.longitude}') * COS(latitude / 57.3), 2)) AS distance
+  FROM vendor where market_place_id = '${req.query.market_place_id}' having distance <= 60000000000 ORDER BY rating desc , distance desc;`
+   pool.query(query,(err,result)=>{
+  if(err) throw err;
+      else res.json({status : 200 ,result})
+})
+})
+
+
+router.get('/get-all-marketplace',(req,res)=>{
+  pool.query(`select * from product where market_place_id = '${req.query.market_place_id}'`,(err,result)=>{
+    if(err) throw err;
+    else res.json(result)
+  })
+})
+
+
+
+
+
+
+// home page api ends
 
 
 // Dummy#Dummy2022#Dummy
