@@ -463,7 +463,7 @@ router.post("/mycart", (req, res) => {
   })
 
   router.get('/offers',(req,res)=>{
-    pool.query(`select * from offers where orderid = '${req.query.vendorid}' order by id desc`,(err,result)=>{
+    pool.query(`select * from offers where vendorid = '${req.query.vendorid}' order by id desc`,(err,result)=>{
       if(err) throw err;
       else res.json({status:200,result})
     })
