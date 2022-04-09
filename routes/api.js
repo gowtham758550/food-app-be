@@ -336,7 +336,7 @@ router.post("/mycart", (req, res) => {
     
   
   
-  pool.query(`delete from cart where number = '${req.body.usernumber}'`,(err,result)=>{
+  pool.query(`delete from cart where usernumber = '${req.body.usernumber}'`,(err,result)=>{
     if(err) throw err;
     else {
   
@@ -365,8 +365,13 @@ router.post("/mycart", (req, res) => {
     })
   })
 
-  router.post('/update-profile', (req, res) => {
+  router.post('/update-profile',upload.single('image'), (req, res) => {
     console.log('data',req.body)
+
+    if(req.file){
+    body['image'] = req.file.filename;
+    }
+
     pool.query(`update users set ? where id = ?`, [req.body, req.body.id], (err, result) => {
         if(err) {
             res.json({
@@ -950,6 +955,7 @@ router.get('/get-all-marketplace',(req,res)=>{
     else res.json(result)
   })
 })
+
 
 
 
