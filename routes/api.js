@@ -902,14 +902,14 @@ router.get('/get-marketplace',(req,res)=>{
 
 
 router.get('/get-town',(req,res)=>{
-  pool.query(`select * from town`,(req,res)=>{
+  pool.query(`select * from town`,(err,result)=>{
     if(err) throw err;
     else res.json(result);
   })
 })
 
 router.get('/get-district',(req,res)=>{
-  pool.query(`select * from district`,(req,res)=>{
+  pool.query(`select * from district`,(err,result)=>{
     if(err) throw err;
     else res.json(result);
   })
@@ -917,12 +917,20 @@ router.get('/get-district',(req,res)=>{
 
 
 router.get('/get-zone',(req,res)=>{
-  pool.query(`select * from zone`,(req,res)=>{
+  pool.query(`select * from zone`,(err,result)=>{
     if(err) throw err;
     else res.json(result);
   });
 });
 
+
+
+router.get('/get-banner',(req,res)=>{
+  pool.query(`select * from banner order by id desc`,(err,result)=>{
+    if(err) throw err;
+    else res.json(result)
+  })
+})
 
 
 
