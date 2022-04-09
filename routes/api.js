@@ -181,7 +181,7 @@ router.get('/get-single-address',(req,res)=>{
 
 
 
-router.post("/cart-handler", (req, res) => {
+  router.post("/cart-handler", (req, res) => {
     let body = req.body
     console.log(req.body)
     if (req.body.quantity == "0" || req.body.quantity == 0) {
@@ -230,7 +230,7 @@ router.post("/cart-handler", (req, res) => {
         })
     }
 
-})
+  })
 
 
 router.post("/mycart", (req, res) => {
@@ -894,7 +894,7 @@ router.post('/accept-order', (req, res) => {
 
 
 router.get('/get-marketplace',(req,res)=>{
-  pool.query(`select * from market_place`,(req,res)=>{
+  pool.query(`select * from market_place`,(err,result)=>{
     if(err) throw err;
     else res.json(result);
   })
