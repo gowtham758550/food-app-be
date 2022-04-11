@@ -94,71 +94,112 @@ router.get('/single-vendor-details',(req,res)=>{
   
   })  
 
-
-  router.get('/get-address',(req,res)=>{
-    pool.query(`select * from address where usernumber = '${req.query.usernumber}'`,(err,result)=>{
-        if(err) throw err;
-        else res.json({status : 200 ,result})
+// get addresses with its usernumber(passed as query)
+router.get('/get-address',(req,res)=>{
+  // when usernumber not in the query
+  if(!req.query.usernumber) {
+    return res.status(400).send({
+      error: 'usernumber not found in the query'
     })
-})
-
-
-
-router.post('/save-address',(req,res)=>{
-    let body = req.body;
-    console.log('body h',req.body)
-    pool.query(`insert into address set ?`,body,(err,result)=>{
-        if(err) throw err;
-        else res.json({
-          status : 200,
-            msg : 'success'
-        })
-    })
-})
-
-
-router.get('/delete-address',(req,res)=>{
-    pool.query(`delete from address where id = '${req.query.id}'`,(err,result)=>{
-      if(err) throw err;
-      else res.json({status:200,msg:'success'})
+  }
+  pool.query(`select * from address where usernumber = '${req.query.usernumber}'`,(err,result)=>{
+    if(err) {
+      return res.status(500).send({
+        error: err
+      })
+    }
+    if (!result[0]) {
+      return res.status(404).send({
+        error: 'Address not found'
+      })
+    }
+    return res.status(200).send({
+      ...result
     })
   })
-  
-  
-  
+}) 
+
+// get specific address with its id
 router.get('/get-single-address',(req,res)=>{
-    pool.query(`select * from address where id = '${req.query.id}'`,(err,result)=>{
-      if(err) throw err;
-      else res.json({status:200,result})
+  if(!req.query.id) {
+    return res.status(400).send({
+      error: 'id not found in the query'
+    })
+  }
+  pool.query(`select * from address where id = '${req.query.id}'`,(err,result)=>{
+    if(err) {
+      return res.status(500).send({
+        error: err
+      })
+    }
+    return res.status(200).send({
+      ...result[0]
     })
   })
-  
-  
-  
-  router.post('/update-address', (req, res) => {
-    console.log('data',req.body)
-    pool.query(`update address set ? where id = ?`, [req.body, req.body.id], (err, result) => {
-        if(err) {
-            res.json({
-                status:500,
-                type : 'error',
-                description:err
-            })
-        }
-        else {
-            res.json({
-                status:200,
-                type : 'success',
-                description:'successfully update'
-            })
-  
-            
-        }
+})
+
+// saves the address to address table
+// columns - place_name, decription, tag, townid, districtid, zoneid, usernumber
+router.post('/save-address',(req,res)=>{
+  if(Object.keys(req.body).length === 0) {
+    return res.status(400).send({
+      error: 'No data in request body'
+    })
+  }
+  pool.query(`insert into address set ?`,req.body,(err)=>{
+    if(err) {
+      return res.status(500).send({
+        error: err
+      })
+    }
+    return res.status(200).send({
+      status: 'Address added Successfully'
     })
   })
+})
+  
+router.put('/update-address', (req, res) => {
+  if (!req.body.id) {
+    return res.status(400).send({
+      error: 'ID not found in the body'
+    })
+  }
+  pool.query(`update address set ? where id = ?`, [req.body, req.body.id], (err, result) => {
+    if(err) {
+        return res.status(500).send({
+          error: err
+        })
+    }
+    return res.status(200).send({
+      status: 'Address updated Successfully'
+    })
+  })
+})
 
-
-
+// delete address with its id
+router.delete('/delete-address',(req,res)=>{
+  if (!req.query.id) {
+    return res.status(400).send({
+      error: 'id not in the request body'
+    })
+  }
+  pool.query(`delete from address where id = '${req.query.id}'`,(err,result)=>{
+    if(err) {
+      return res.status(500).send({
+        error: err
+      })
+    }
+    if(result.affectedRows === 0) {
+      return res.status(404).send({
+        error: `no address with id-${req.query.id} to delete`
+      })
+    }
+    return res.status(200).send({
+      status: `address-${req.query.id} deleted`,
+    })
+  })
+})
+  
 
   router.post("/cart-handler", (req, res) => {
     let body = req.body
